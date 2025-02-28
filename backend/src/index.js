@@ -36,15 +36,23 @@ app.use(
   })
 );
 
-// CORS Middleware
+// Add security headers middleware before routes
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', 'https://fullstack-chat-app-frontend-np9p.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
+// Update CORS configuration
 app.use(
   cors({
     origin: [
-      process.env.CLIENT_URL,
-      "https://fullstack-chat-app-frontend-np9p.onrender.com",
-      "http://localhost:5173",
+      "https://fullstack-chat-app-frontend-np9p.onrender.com"
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 

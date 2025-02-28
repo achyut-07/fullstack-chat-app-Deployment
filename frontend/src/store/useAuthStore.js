@@ -47,12 +47,23 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post("/auth/login", data);
+      
+      // Debug logging
+      console.log('Login response:', res);
+      console.log('Cookies:', document.cookie);
+      
+      // Store token in localStorage as backup
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+      
       set({ authUser: res.data });
-      toast.success("Logged in successfully");
-
       get().connectSocket();
+      
+      toast.success("Logged in successfully");
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.error('Login error:', error);
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ isLoggingIn: false });
     }

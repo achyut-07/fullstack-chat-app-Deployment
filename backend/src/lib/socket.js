@@ -7,7 +7,9 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["https://fullstack-chat-app-frontend-np9p.onrender.com", "http://localhost:5173"],
+    origin: ["https://fullstack-chat-app-frontend-np9p.onrender.com"],
+    credentials: true,
+    methods: ["GET", "POST"]
   },
 });
 
