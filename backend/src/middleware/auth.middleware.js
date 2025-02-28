@@ -3,13 +3,18 @@ import User from "../models/user.model.js";
 
 export const protectRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    console.log("Cookies received:", req.cookies); // Debug log
+    console.log("Headers:", req.headers); // Debug log
+    
+    const token = req.cookies.jwt || req.headers.authorization?.split(' ')[1];
 
     if (!token) {
+      console.log("No token found in cookies or headers"); // Debug log
       return res.status(401).json({ message: "Unauthorized - No Token Provided" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Token decoded:", decoded); // Debug log
 
     if (!decoded) {
       return res.status(401).json({ message: "Unauthorized - Invalid Token" });
@@ -22,7 +27,6 @@ export const protectRoute = async (req, res, next) => {
     }
 
     req.user = user;
-
     next();
   } catch (error) {
     console.log("Error in protectRoute middleware: ", error.message);

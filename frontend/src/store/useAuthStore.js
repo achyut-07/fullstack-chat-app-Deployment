@@ -17,12 +17,18 @@ export const useAuthStore = create((set, get) => ({
 
   checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("/auth/check");
+      // Get token from localStorage
+      const token = localStorage.getItem('jwt');
+      if (token) {
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
 
+      const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
       console.log("Error in checkAuth:", error);
+      localStorage.removeItem('jwt'); // Clear invalid token
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -48,13 +54,11 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
       
-      // Debug logging
-      console.log('Login response:', res);
-      console.log('Cookies:', document.cookie);
-      
-      // Store token in localStorage as backup
+      // Store token in localStorage
       if (res.data.token) {
-        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('jwt', res.data.token);
+        // Set token in axios default headers
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       }
       
       set({ authUser: res.data });
@@ -72,11 +76,12 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
+      localStorage.removeItem('jwt');
+      delete axiosInstance.defaults.headers.common['Authorization'];
       set({ authUser: null });
-      toast.success("Logged out successfully");
       get().disconnectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.log("Error in logout:", error);
     }
   },
 
