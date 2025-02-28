@@ -20,12 +20,7 @@ const __dirname = path.resolve();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  })
-);
+
 
 // Session middleware
 app.use(
@@ -33,6 +28,23 @@ app.use(
     secret: process.env.SESSION_SECRET || "your_session_secret",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    },
+  })
+);
+
+// CORS Middleware
+app.use(
+  cors({
+    origin: [
+      process.env.CLIENT_URL,
+      "https://fullstack-chat-app-frontend-np9p.onrender.com",
+      "http://localhost:5173",
+    ],
+    credentials: true,
   })
 );
 
